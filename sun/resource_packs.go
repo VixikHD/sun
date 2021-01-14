@@ -47,12 +47,17 @@ import (
 func LoadResourcePacks(path string) []*resource.Pack {
 	_, err := os.Stat(path)
 	if err != nil {
-		_ = os.Mkdir(path, 0644)
+		_ = os.Mkdir(path, 0555)
 	}
 
 	var packs []*resource.Pack
 
-	files, _ := ioutil.ReadDir(path + "/")
+	files, err := ioutil.ReadDir(filepath.FromSlash(path + "/"))
+	if err != nil {
+		fmt.Printf("Error whilst scanning dir for resource pack: %v\n", err)
+		return packs
+	}
+
 	for _, f := range files {
 		ext := filepath.Ext(f.Name())
 		if ext != ".mcpack" && ext != ".zip" {
@@ -67,7 +72,7 @@ func LoadResourcePacks(path string) []*resource.Pack {
 		}
 
 		packs = append(packs, pack)
-		fmt.Printf("Resource pack %v v%v loaded!", f.Name(), pack.Version())
+		fmt.Printf("Resource pack %v v%v loaded!\n", f.Name(), pack.Version())
 	}
 
 	return packs

@@ -80,7 +80,7 @@ func NewSunW(config Config) (*Sun, error) {
 	listener, err := minecraft.ListenConfig{
 		AuthenticationDisabled: !config.Proxy.XboxAuthentication,
 		StatusProvider:         status,
-		ResourcePacks:          LoadResourcePacks("./resource_packs/"),
+		ResourcePacks:          LoadResourcePacks("./resource_packs"),
 	}.Listen("raknet", fmt.Sprint(":", config.Proxy.Port))
 	if err != nil {
 		return nil, err
@@ -169,13 +169,13 @@ func (s *Sun) MakeRay(ray *Ray) {
 	g.Add(2)
 	go func() {
 		if err := ray.conn.StartGame(ray.Remote().conn.GameData()); err != nil {
-			panic(err)
+			return // Connection was closed by server
 		}
 		g.Done()
 	}()
 	go func() {
 		if err := ray.Remote().conn.DoSpawn(); err != nil {
-			panic(err)
+			return // Connection was closed by server
 		}
 		g.Done()
 	}()
